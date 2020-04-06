@@ -1,0 +1,4 @@
+# dmitry.ninja
+
+User-agent: *
+Disallow:
