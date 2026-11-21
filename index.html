@@ -1,231 +1,321 @@
 <!DOCTYPE html>
-<html>
-	<head>
-		<meta charset=utf-8>
-		<title>Test three.js shaders</title>
-		<style>
-			body { margin: 0; }
-			canvas { width: 100%; height: 100% }
-		</style>
-	</head>
-	<body>
-    <!-- <script src="js/three.min.js"></script> -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r70/three.min.js"></script>
-    <!-- THIS is OPENGL Shading language scripts -->
-    <script id="vertex-shader" type="no-js">
-      void main()	{
-        gl_Position = vec4( position, 1.0 );
-      }
-    </script>
-    <!-- orinal from https://www.shadertoy.com/view/Ms2SD1 -->
-    <script id="fragment-shader" type="no-js">
-      uniform vec2      iResolution;           // viewport resolution (in pixels)
-      uniform float     iTime;                 // shader playback time (in seconds)
-      uniform float     iTimeDelta;            // render time (in seconds)
-      uniform int       iFrame;                // shader playback frame
-      uniform float     iChannelTime[4];       // channel playback time (in seconds)
-      uniform vec3      iChannelResolution[4]; // channel resolution (in pixels)
-      uniform vec4      iMouse;                // mouse pixel coords. xy: current (if MLB down), zw: click
-      // uniform samplerXX iChannel0..3;          // input channel. XX = 2D/Cube
-      // uniform vec4      iDate;                 // (year, month, day, time in seconds)
-      // uniform float     iSampleRate;           // sound sample rate (i.e., 44100)
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Дмитрий Сорокин — Senior Backend Engineer / Node.js / TypeScript</title>
+  <meta name="description" content="Дмитрий Сорокин — Senior Backend Engineer. Node.js, TypeScript, архитектура backend, микросервисы. 14+ лет коммерческой разработки. Резюме.">
+  <meta property="og:title" content="Дмитрий Сорокин — Senior Backend Engineer">
+  <meta property="og:description" content="Node.js / TypeScript / NestJS. 14+ лет опыта. Таганрог, удалёнка.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23181e19'/%3E%3Cpath d='M8 8h16v16H8z' fill='none' stroke='%237ee85a' stroke-width='2'/%3E%3Cpath d='M12 12l6 4-6 4' fill='none' stroke='%237ee85a' stroke-width='2'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-      uniform float iGlobalTime;
-      // uniform vec2 iResolution;
-      // uniform vec4 iMouse;
+  <!-- CRT-оверлей: сканлайны, RGB-маска, виньетка, луч, мерцание -->
+  <div class="crt" aria-hidden="true">
+    <div class="crt__rgb"></div>
+    <div class="crt__scanlines"></div>
+    <div class="crt__beam"></div>
+    <div class="crt__vignette"></div>
+    <div class="crt__flicker"></div>
+  </div>
 
-      const int NUM_STEPS = 8;
-      const float PI	 	= 3.1415;
-      const float EPSILON	= 1e-3;
-      float EPSILON_NRM	= 0.1 / iResolution.x;
+  <!-- Загрузочный экран -->
+  <div class="boot" id="boot" aria-hidden="true">
+    <pre class="boot__text" id="boot-text"></pre>
+    <span class="boot__hint" data-i18n="boot.hint">[ нажмите, чтобы пропустить ]</span>
+  </div>
 
-      // sea
-      const int ITER_GEOMETRY = 3;
-      const int ITER_FRAGMENT = 5;
-      const float SEA_HEIGHT = 0.6;
-      const float SEA_CHOPPY = 4.0;
-      const float SEA_SPEED = 0.8;
-      const float SEA_FREQ = 0.16;
-      const vec3 SEA_BASE = vec3(0.1,0.19,0.22);
-      const vec3 SEA_WATER_COLOR = vec3(0.8,0.9,0.6);
-      float SEA_TIME = iGlobalTime * SEA_SPEED;
-      mat2 octave_m = mat2(1.6,1.2,-1.2,1.6);
+  <div class="screen">
+    <header class="topbar">
+      <div class="topbar__logo">NC<span>//</span>NETWIRE</div>
+      <nav class="topbar__nav" aria-label="Основная навигация">
+        <a href="#about" data-i18n="nav.about">Обо_мне</a>
+        <a href="#experience" data-i18n="nav.experience">Опыт</a>
+        <a href="#skills" data-i18n="nav.skills">Навыки</a>
+        <a href="#education" data-i18n="nav.education">Образование</a>
+        <a href="#profiles" data-i18n="nav.profiles">Профили</a>
+      </nav>
+      <div class="lang-toggle" role="group" aria-label="Language / Язык">
+        <button type="button" class="lang-toggle__opt is-active" data-lang="ru">RU</button>
+        <button type="button" class="lang-toggle__opt" data-lang="en">EN</button>
+      </div>
+      <div class="topbar__status"><span class="topbar__dot"></span><span data-i18n="top.online">ONLINE</span></div>
+    </header>
 
-      // math
-      mat3 fromEuler(vec3 ang) {
-        vec2 a1 = vec2(sin(ang.x),cos(ang.x));
-          vec2 a2 = vec2(sin(ang.y),cos(ang.y));
-          vec2 a3 = vec2(sin(ang.z),cos(ang.z));
-          mat3 m;
-          m[0] = vec3(a1.y*a3.y+a1.x*a2.x*a3.x,a1.y*a2.x*a3.x+a3.y*a1.x,-a2.y*a3.x);
-        m[1] = vec3(-a2.y*a1.x,a1.y*a2.y,a2.x);
-        m[2] = vec3(a3.y*a1.x*a2.x+a1.y*a3.x,a1.x*a3.x-a1.y*a3.y*a2.x,a2.y*a3.y);
-        return m;
-      }
-      float hash( vec2 p ) {
-        float h = dot(p,vec2(127.1,311.7));	
-          return fract(sin(h)*43758.5453123);
-      }
-      float noise( in vec2 p ) {
-          vec2 i = floor( p );
-          vec2 f = fract( p );	
-        vec2 u = f*f*(3.0-2.0*f);
-          return -1.0+2.0*mix( mix( hash( i + vec2(0.0,0.0) ), 
-                           hash( i + vec2(1.0,0.0) ), u.x),
-                      mix( hash( i + vec2(0.0,1.0) ), 
-                           hash( i + vec2(1.0,1.0) ), u.x), u.y);
-      }
+    <main>
+      <!-- HERO -->
+      <section class="hero panel" id="hero">
+        <div class="hero__meta" data-i18n="hero.meta">FILE: RESUME.SYS&nbsp;&nbsp;//&nbsp;&nbsp;LOC: TAGANROG&nbsp;&nbsp;//&nbsp;&nbsp;MODE: REMOTE&nbsp;&nbsp;//&nbsp;&nbsp;EXP: 14+ YRS</div>
+        <h1 class="glitch hero__name" data-text="ДМИТРИЙ СОРОКИН" data-i18n="hero.name">ДМИТРИЙ СОРОКИН</h1>
+        <p class="hero__role">&gt; <span id="typeline"></span><span class="cursor">&nbsp;</span></p>
+        <ul class="hero__stats">
+          <li data-i18n-html="hero.stat1"><b>14+</b> лет в разработке</li>
+          <li data-i18n-html="hero.stat2"><b>Backend</b>: Node.js / TypeScript</li>
+          <li data-i18n-html="hero.stat3"><b>Английский</b>: B2</li>
+          <li data-i18n-html="hero.stat4"><b>Формат</b>: удалёнка</li>
+        </ul>
+      </section>
 
-      // lighting
-      float diffuse(vec3 n,vec3 l,float p) {
-          return pow(dot(n,l) * 0.4 + 0.6,p);
-      }
-      float specular(vec3 n,vec3 l,vec3 e,float s) {    
-          float nrm = (s + 8.0) / (3.1415 * 8.0);
-          return pow(max(dot(reflect(e,n),l),0.0),s) * nrm;
-      }
+      <!-- ОБО МНЕ -->
+      <section class="section" id="about">
+        <h2 class="section__title glitch" data-text="ОБО_МНЕ" data-i18n="about.title">ОБО_МНЕ</h2>
+        <div class="panel section__body">
+          <p data-i18n-html="about.p1">Senior Backend Engineer с коммерческим опытом разработки ПО более <b class="hl">14 лет</b>. Специализируюсь на Node.js, TypeScript, архитектуре backend и масштабируемых серверных приложениях.</p>
+          <p data-i18n="about.p2">Занимаюсь созданием и сопровождением backend-систем, проектированием архитектуры приложений, разработкой API, интеграцией внешних сервисов, оптимизацией производительности и работы баз данных.</p>
+          <p data-i18n-html="about.p3">За карьеру поучаствовал в разнообразных продуктах: <b class="hl">PropTech</b>, <b class="hl">Healthcare</b>, <b class="hl">SaaS</b>, <b class="hl">Marketplace Analytics</b>, <b class="hl">EdTech</b> и других доменах.</p>
+          <h3 class="about__subtitle" data-i18n="about.subtitle">// Ключевой опыт</h3>
+          <ul class="about__list">
+            <li data-i18n-html="about.h1"><b>Самолет</b> — разработка и сопровождение backend-приложений на Node.js, TypeScript и PostgreSQL</li>
+            <li data-i18n-html="about.h2"><b>ItLabRealty</b> — платформа недвижимости Dombook: API, оптимизация баз данных, микросервисы</li>
+            <li data-i18n-html="about.h3"><b>Curogram</b> — медицинская платформа для рынка США: Node.js, NestJS, GraphQL, MongoDB</li>
+            <li data-i18n-html="about.h4"><b>Suntegy</b> — международные продукты MarketGuru и игровые платформы, техническое лидерство</li>
+            <li data-i18n="about.h5">Опыт работы в командах: архитектурные решения, code review, оптимизация производительности</li>
+          </ul>
+          <p class="about__extra" data-i18n-html="about.looking">Ищу: удалённую работу Senior Backend Engineer или Senior Node.js Developer.</p>
+        </div>
+      </section>
 
-      // sky
-      vec3 getSkyColor(vec3 e) {
-          e.y = max(e.y,0.0);
-          vec3 ret;
-          ret.x = pow(1.0-e.y,2.0);
-          ret.y = 1.0-e.y;
-          ret.z = 0.6+(1.0-e.y)*0.4;
-          return ret;
-      }
+      <!-- ОПЫТ -->
+      <section class="section" id="experience">
+        <h2 class="section__title glitch" data-text="ОПЫТ_РАБОТЫ" data-i18n="exp.title">ОПЫТ_РАБОТЫ</h2>
+        <div class="timeline">
 
-      // sea
-      float sea_octave(vec2 uv, float choppy) {
-          uv += noise(uv);        
-          vec2 wv = 1.0-abs(sin(uv));
-          vec2 swv = abs(cos(uv));    
-          wv = mix(wv,swv,wv);
-          return pow(1.0-pow(wv.x * wv.y,0.65),choppy);
-      }
+          <article class="panel job reveal">
+            <div class="job__period"><span data-i18n="j1.period">СЕН 2023 — АВГ 2026</span><span data-i18n="j1.len">3 года</span></div>
+            <h3 class="job__role" data-i18n="j1.role">Senior Backend Developer</h3>
+            <div class="job__company" data-i18n="j1.company">Самолет Плюс // Москва · удалённо</div>
+            <ul>
+              <li data-i18n="j1.b1">Разрабатывал и поддерживал backend-компоненты цифровых продуктов</li>
+              <li data-i18n="j1.b2">Реализовывал серверную бизнес-логику на Node.js и TypeScript</li>
+              <li data-i18n="j1.b3">Разрабатывал и поддерживал REST API</li>
+              <li data-i18n="j1.b4">Работал с PostgreSQL и функциональностью, связанной с базами данных</li>
+              <li data-i18n="j1.b5">Рефакторил существующий код и повышал поддерживаемость приложения</li>
+              <li data-i18n="j1.b6">Оптимизировал производительность приложения</li>
+              <li data-i18n="j1.b7">Мониторил работоспособность и производительность приложения</li>
+              <li data-i18n="j1.b8">Участвовал в архитектурных решениях и совместной разработке</li>
+            </ul>
+            <div class="job__tags"><span>Node.js</span><span>TypeScript</span><span>JavaScript</span><span>PostgreSQL</span><span>Moleculer.js</span><span>Kafka</span><span>Docker</span><span>Kubernetes</span><span>Grafana</span><span>Kibana</span><span>Sentry</span><span>CI/CD</span><span>Git</span><span>GitLab</span></div>
+          </article>
 
-      float map(vec3 p) {
-          float freq = SEA_FREQ;
-          float amp = SEA_HEIGHT;
-          float choppy = SEA_CHOPPY;
-          vec2 uv = p.xz; uv.x *= 0.75;
+          <article class="panel job reveal">
+            <div class="job__period"><span data-i18n="j2.period">ФЕВ 2023 — АВГ 2023</span><span data-i18n="j2.len">7 мес</span></div>
+            <h3 class="job__role" data-i18n="j2.role">Backend Developer</h3>
+            <div class="job__company" data-i18n="j2.company">ItLabRealty // Москва · удалённо</div>
+            <p class="job__project" data-i18n-html="j2.project">Проект: <b>Dombook</b> — платформа недвижимости для продажи новостроек</p>
+            <ul>
+              <li data-i18n="j2.b1">Разрабатывал и поддерживал backend API</li>
+              <li data-i18n="j2.b2">Реализовывал новую функциональность приложения</li>
+              <li data-i18n="j2.b3">Оптимизировал запросы и операции с базами данных</li>
+              <li data-i18n="j2.b4">Поддерживал и улучшал существующие компоненты приложения</li>
+              <li data-i18n="j2.b5">Работал с микросервисной архитектурой</li>
+            </ul>
+            <div class="job__tags"><span>Node.js</span><span>TypeScript</span><span>JavaScript</span><span>PostgreSQL</span><span>Moleculer.js</span><span>Docker</span><span>Kubernetes</span><span>Grafana</span><span>CI/CD</span><span>Git</span><span>GitLab</span></div>
+          </article>
 
-          float d, h = 0.0;    
-          for(int i = 0; i < ITER_GEOMETRY; i++) {        
-            d = sea_octave((uv+SEA_TIME)*freq,choppy);
-            d += sea_octave((uv-SEA_TIME)*freq,choppy);
-              h += d * amp;        
-            uv *= octave_m; freq *= 1.9; amp *= 0.22;
-              choppy = mix(choppy,1.0,0.2);
-          }
-          return p.y - h;
-      }
+          <article class="panel job reveal">
+            <div class="job__period"><span data-i18n="j3.period">ДЕК 2020 — ЯНВ 2023</span><span data-i18n="j3.len">2 г 2 мес</span></div>
+            <h3 class="job__role" data-i18n="j3.role">Backend Developer</h3>
+            <div class="job__company" data-i18n="j3.company">Curogram // Таганрог · гибрид</div>
+            <p class="job__project" data-i18n="j3.project">Curogram — медицинская технологическая платформа США, соединяющая клиники и пациентов</p>
+            <ul>
+              <li data-i18n="j3.b1">Разрабатывал и поддерживал backend-сервисы</li>
+              <li data-i18n="j3.b2">Реализовывал бизнес-логику приложения</li>
+              <li data-i18n="j3.b3">Разрабатывал GraphQL API</li>
+              <li data-i18n="j3.b4">Работал с микросервисной архитектурой</li>
+              <li data-i18n="j3.b5">Интегрировал backend-сервисы с веб- и мобильными приложениями</li>
+              <li data-i18n="j3.b6">Работал с MongoDB и компонентами backend-сервисов</li>
+              <li data-i18n="j3.b7">Поддерживал и расширял существующую функциональность приложения</li>
+            </ul>
+            <div class="job__tags"><span>Node.js</span><span>TypeScript</span><span>NestJS</span><span>Express.js</span><span>GraphQL</span><span>MongoDB</span><span>RabbitMQ</span><span>Elasticsearch</span><span>Docker</span><span>Kubernetes</span><span>Git</span><span>GitHub</span></div>
+          </article>
 
-      float map_detailed(vec3 p) {
-          float freq = SEA_FREQ;
-          float amp = SEA_HEIGHT;
-          float choppy = SEA_CHOPPY;
-          vec2 uv = p.xz; uv.x *= 0.75;
+          <article class="panel job reveal">
+            <div class="job__period"><span data-i18n="j4.period">ФЕВ 2018 — ДЕК 2020</span><span data-i18n="j4.len">2 г 11 мес</span></div>
+            <h3 class="job__role" data-i18n="j4.role">Senior Backend Developer | Техническое лидерство</h3>
+            <div class="job__company" data-i18n="j4.company">SUNTEGY // Таганрог · офис</div>
+            <p class="job__project" data-i18n-html="j4.projectA"><b>MarketGuru</b> — платформа аналитики маркетплейсов</p>
+            <ul>
+              <li data-i18n="j4.a1">Backend-разработка на Node.js и NestJS</li>
+              <li data-i18n="j4.a2">Разработка API и функциональности приложения</li>
+              <li data-i18n="j4.a3">Интеграция баз данных на PostgreSQL</li>
+              <li data-i18n="j4.a4">Участие в разработке микросервисной архитектуры</li>
+            </ul>
+            <p class="job__project" data-i18n-html="j4.projectB"><b>CSGO DEP / PUBG DEP</b> — игровые цифровые продукты</p>
+            <ul>
+              <li data-i18n="j4.b1">Backend-разработка и реализация серверной функциональности</li>
+              <li data-i18n="j4.b2">Сопровождение приложений и исправление ошибок</li>
+              <li data-i18n="j4.b3">Разработка и поддержка существующих функций проектов</li>
+            </ul>
+            <ul>
+              <li data-i18n="j4.final">Дополнительно: участие в технических решениях и работа в команде разработки</li>
+            </ul>
+            <div class="job__tags"><span>Node.js</span><span>TypeScript</span><span>JavaScript</span><span>NestJS</span><span>GraphQL</span><span>PostgreSQL</span><span>Docker</span><span>Elasticsearch</span><span>Nginx</span><span>Git</span><span>GitLab</span></div>
+          </article>
 
-          float d, h = 0.0;    
-          for(int i = 0; i < ITER_FRAGMENT; i++) {        
-            d = sea_octave((uv+SEA_TIME)*freq,choppy);
-            d += sea_octave((uv-SEA_TIME)*freq,choppy);
-              h += d * amp;        
-            uv *= octave_m; freq *= 1.9; amp *= 0.22;
-              choppy = mix(choppy,1.0,0.2);
-          }
-          return p.y - h;
-      }
+          <article class="panel job reveal">
+            <div class="job__period"><span data-i18n="j5.period">АПР 2017 — ФЕВ 2018</span><span data-i18n="j5.len">11 мес</span></div>
+            <h3 class="job__role" data-i18n="j5.role">JavaScript-разработчик</h3>
+            <div class="job__company" data-i18n="j5.company">DreamStudy // Россия · удалённо</div>
+            <ul>
+              <li data-i18n="j5.b1">Разрабатывал модули и поддерживал образовательную платформу с функцией видеоконференций</li>
+            </ul>
+            <div class="job__tags"><span>Node.js</span><span>JavaScript</span><span>React</span><span>Redux</span><span>WebRTC</span><span>Vagrant</span></div>
+          </article>
 
-      vec3 getSeaColor(vec3 p, vec3 n, vec3 l, vec3 eye, vec3 dist) {  
-          float fresnel = 1.0 - max(dot(n,-eye),0.0);
-          fresnel = pow(fresnel,3.0) * 0.65;
+          <article class="panel job reveal">
+            <div class="job__period"><span data-i18n="j6.period">ИЮЛ 2014 — АПР 2017</span><span data-i18n="j6.len">2 г 10 мес</span></div>
+            <h3 class="job__role" data-i18n="j6.role">Fullstack веб-разработчик</h3>
+            <div class="job__company" data-i18n="j6.company">Lodoss Team // Ростовская обл. · офис</div>
+            <ul>
+              <li data-i18n="j6.b1">Работал над веб-приложениями, социальными сетями, образовательными платформами и SaaS-проектами</li>
+            </ul>
+            <div class="job__tags"><span>Ruby on Rails</span><span>Node.js</span><span>JavaScript</span><span>PHP</span><span>Laravel</span><span>MongoDB</span><span>AngularJS</span></div>
+          </article>
 
-          vec3 reflected = getSkyColor(reflect(eye,n));    
-          vec3 refracted = SEA_BASE + diffuse(n,l,80.0) * SEA_WATER_COLOR * 0.12; 
+          <article class="panel job reveal">
+            <div class="job__period"><span data-i18n="j7.period">ФЕВ 2013 — ИЮН 2014</span><span data-i18n="j7.len">1 г 5 мес</span></div>
+            <h3 class="job__role" data-i18n="j7.role">JavaScript-разработчик</h3>
+            <div class="job__company" data-i18n="j7.company">RusRise // Россия, Ростовская обл. · офис</div>
+            <ul>
+              <li data-i18n="j7.b1">Разрабатывал приложения на Node.js, работал с MongoDB, поддерживал Boxcar Editor и разрабатывал API-интеграции с Trello</li>
+            </ul>
+            <div class="job__tags"><span>Node.js</span><span>JavaScript</span><span>MongoDB</span><span>Backbone.js</span></div>
+          </article>
 
-          vec3 color = mix(refracted,reflected,fresnel);
+          <article class="panel job reveal">
+            <div class="job__period"><span data-i18n="j8.period">ЯНВ 2014 — ФЕВ 2014</span><span data-i18n="j8.len">2 мес</span></div>
+            <h3 class="job__role" data-i18n="j8.role">JavaScript-разработчик (фриланс)</h3>
+            <div class="job__company" data-i18n="j8.company">oDesk // Россия · удалённо</div>
+            <ul>
+              <li data-i18n="j8.b1">Выполнял задачи разработки на Node.js и Meteor.js</li>
+            </ul>
+            <div class="job__tags"><span>Node.js</span><span>Meteor.js</span></div>
+          </article>
 
-          float atten = max(1.0 - dot(dist,dist) * 0.001, 0.0);
-          color += SEA_WATER_COLOR * (p.y - SEA_HEIGHT) * 0.18 * atten;
+          <article class="panel job reveal">
+            <div class="job__period"><span data-i18n="j9.period">АПР 2011 — ДЕК 2012</span><span data-i18n="j9.len">1 г 9 мес</span></div>
+            <h3 class="job__role" data-i18n="j9.role">PHP-разработчик</h3>
+            <div class="job__company" data-i18n="j9.company">KMGi Group · Crucial BrainWare Development Team // Таганрог · офис</div>
+            <ul>
+              <li data-i18n="j9.b1">Разрабатывал и поддерживал сайт transparentbusiness и другие веб-приложения, e-commerce-модули и сайты</li>
+            </ul>
+            <div class="job__tags"><span>PHP</span><span>Zend Framework</span><span>Symfony 2</span><span>Magento</span><span>MySQL</span></div>
+          </article>
 
-          color += vec3(specular(n,l,eye,60.0));
+        </div>
+      </section>
 
-          return color;
-      }
+      <!-- НАВЫКИ -->
+      <section class="section" id="skills">
+        <h2 class="section__title glitch" data-text="НАВЫКИ" data-i18n="skills.title">НАВЫКИ</h2>
+        <div class="panel section__body">
+          <div class="skills__group">
+            <h3 data-i18n="skills.g1">// Backend-разработка</h3>
+            <div class="chips"><span class="chip chip--core">Node.js</span><span class="chip chip--core">TypeScript</span><span class="chip chip--core">JavaScript</span><span class="chip chip--core">NestJS</span><span class="chip">Express.js</span><span class="chip">Fastify</span></div>
+          </div>
+          <div class="skills__group">
+            <h3 data-i18n="skills.g2">// Архитектура и проектирование</h3>
+            <div class="chips"><span class="chip chip--core" data-i18n="chip.micro">Микросервисы</span><span class="chip chip--core">REST API</span><span class="chip">GraphQL</span><span class="chip">WebSocket</span><span class="chip" data-i18n="chip.barch">Архитектура backend</span><span class="chip" data-i18n="chip.dist">Распределённые приложения</span></div>
+          </div>
+          <div class="skills__group">
+            <h3 data-i18n="skills.g3">// Базы данных</h3>
+            <div class="chips"><span class="chip chip--core">PostgreSQL</span><span class="chip">MySQL</span><span class="chip chip--core">MongoDB</span><span class="chip">Redis</span><span class="chip">TypeORM</span></div>
+          </div>
+          <div class="skills__group">
+            <h3 data-i18n="skills.g4">// Очереди и интеграции</h3>
+            <div class="chips"><span class="chip">Apache Kafka</span><span class="chip">RabbitMQ</span><span class="chip" data-i18n="chip.extapi">Интеграция внешних API</span></div>
+          </div>
+          <div class="skills__group">
+            <h3 data-i18n="skills.g5">// Облака и инфраструктура</h3>
+            <div class="chips"><span class="chip chip--core">Docker</span><span class="chip chip--core">Kubernetes</span><span class="chip">AWS</span><span class="chip">Yandex Cloud</span><span class="chip">Linux</span><span class="chip chip--core">CI/CD</span></div>
+          </div>
+          <div class="skills__group">
+            <h3 data-i18n="skills.g6">// Тестирование и инструменты</h3>
+            <div class="chips"><span class="chip">Jest</span><span class="chip">Git</span><span class="chip">Code Review</span></div>
+          </div>
+          <div class="skills__group">
+            <h3 data-i18n="skills.g7">// Дополнительные технологии</h3>
+            <div class="chips"><span class="chip">PHP</span><span class="chip">Ruby on Rails</span><span class="chip">Angular</span><span class="chip">AngularJS</span><span class="chip">React</span><span class="chip">Redux</span><span class="chip">React Native</span></div>
+          </div>
+        </div>
+      </section>
 
-      // tracing
-      vec3 getNormal(vec3 p, float eps) {
-          vec3 n;
-          n.y = map_detailed(p);    
-          n.x = map_detailed(vec3(p.x+eps,p.y,p.z)) - n.y;
-          n.z = map_detailed(vec3(p.x,p.y,p.z+eps)) - n.y;
-          n.y = eps;
-          return normalize(n);
-      }
+      <!-- ОБРАЗОВАНИЕ -->
+      <section class="section" id="education">
+        <h2 class="section__title glitch" data-text="ОБРАЗОВАНИЕ" data-i18n="edu.title">ОБРАЗОВАНИЕ</h2>
+        <div class="grid">
+          <div class="panel card reveal">
+            <h3 class="card__title" data-i18n="edu.c1.title">Высшее образование</h3>
+            <div class="card__text" data-i18n-html="edu.c1.text"><b>Таганрогский технологический институт ЮФУ</b> (бывший РГУ)<br>Инженер, специальность «Вычислительные машины, комплексы, системы и сети»<br><span class="dim">Сен 2006 – Июл 2011</span><br>Проектирование микропроцессорных систем, сетей и печатных плат.</div>
+          </div>
+          <div class="panel card reveal">
+            <h3 class="card__title" data-i18n="edu.c2.title">Сертификаты · MongoDB University</h3>
+            <div class="card__text" data-i18n-html="edu.c2.text"><b>M101JS</b> — MongoDB for Node.js Developers <span class="dim">· 2013</span><br><b>M101P</b> — MongoDB for Developers <span class="dim">· 2013</span><br><b>M102</b> — MongoDB for DBAs <span class="dim">· 2013</span><br><b>oDesk PHP5 Test</b> — PHP <span class="dim">· 2013</span></div>
+          </div>
+          <div class="panel card reveal">
+            <h3 class="card__title" data-i18n="edu.c3.title">Языки</h3>
+            <div class="card__text" data-i18n-html="edu.c3.text">Русский — <b>родной</b><br>Английский — <b>B2</b> <span class="dim">(Upper-Intermediate)</span></div>
+          </div>
+        </div>
+      </section>
 
-      float heightMapTracing(vec3 ori, vec3 dir, out vec3 p) {  
-          float tm = 0.0;
-          float tx = 1000.0;    
-          float hx = map(ori + dir * tx);
-          if(hx > 0.0) return tx;   
-          float hm = map(ori + dir * tm);    
-          float tmid = 0.0;
-          for(int i = 0; i < NUM_STEPS; i++) {
-              tmid = mix(tm,tx, hm/(hm-hx));                   
-              p = ori + dir * tmid;                   
-            float hmid = map(p);
-          if(hmid < 0.0) {
-                tx = tmid;
-                  hx = hmid;
-              } else {
-                  tm = tmid;
-                  hm = hmid;
-              }
-          }
-          return tmid;
-      }
+      <!-- ПРОФИЛИ -->
+      <section class="section" id="profiles">
+        <h2 class="section__title glitch" data-text="ПРОФИЛИ" data-i18n="profiles.title">ПРОФИЛИ</h2>
+        <div class="grid">
+          <a class="panel linkcard reveal" href="https://github.com/cybercarnage" target="_blank" rel="noopener">
+            <div class="linkcard__id">01</div>
+            <div class="linkcard__name">GitHub</div>
+            <div class="linkcard__url">github.com/cybercarnage</div>
+          </a>
+          <a class="panel linkcard reveal" href="https://career.habr.com/sdmtr" target="_blank" rel="noopener">
+            <div class="linkcard__id">02</div>
+            <div class="linkcard__name" data-i18n="prof.habr">Хабр Карьера</div>
+            <div class="linkcard__url">career.habr.com/sdmtr</div>
+          </a>
+          <a class="panel linkcard reveal" href="https://taganrog.hh.ru/resume/caafef46ff01589f080039ed1f5139576a6b53" target="_blank" rel="noopener">
+            <div class="linkcard__id">03</div>
+            <div class="linkcard__name">HeadHunter</div>
+            <div class="linkcard__url">taganrog.hh.ru/resume</div>
+          </a>
+          <a class="panel linkcard reveal" href="https://www.linkedin.com/in/dmitry-sorokin/" target="_blank" rel="noopener">
+            <div class="linkcard__id">04</div>
+            <div class="linkcard__name">LinkedIn</div>
+            <div class="linkcard__url">linkedin.com/in/dmitry-sorokin</div>
+          </a>
+          <a class="panel linkcard reveal" href="https://codepen.io/cyberpunk2077" target="_blank" rel="noopener">
+            <div class="linkcard__id">05</div>
+            <div class="linkcard__name">CodePen</div>
+            <div class="linkcard__url">codepen.io/cyberpunk2077</div>
+          </a>
+        </div>
+      </section>
 
-      void main() {
-        vec2 uv = gl_FragCoord.xy / iResolution.xy;
-          uv = uv * 2.0 - 1.0;
-          uv.x *= iResolution.x / iResolution.y;    
-          float time = iGlobalTime * 0.3 + iMouse.x*0.01;
+      <!-- SHADERS -->
+      <section class="section" id="shaders">
+        <h2 class="section__title glitch" data-text="ШЕЙДЕРЫ" data-i18n="shaders.title">ШЕЙДЕРЫ</h2>
+        <div class="grid">
+          <a class="panel linkcard reveal" href="/shaders/ocean/index.html" target="_blank" rel="noopener">
+            <div class="linkcard__id">01</div>
+            <div class="linkcard__name">Ocean</div>
+            <div class="linkcard__url">dmtrs.site/shaders/ocean</div>
+          </a>
+        </div>
+      </section>
+    </main>
 
-          // ray
-          vec3 ang = vec3(sin(time*3.0)*0.1,sin(time)*0.2+0.3,time);    
-          vec3 ori = vec3(0.0,3.5,time*5.0);
-          vec3 dir = normalize(vec3(uv.xy,-2.0)); dir.z += length(uv) * 0.15;
-          dir = normalize(dir) * fromEuler(ang);
+    <footer class="footer">
+      <div data-i18n-html="footer.copy">© <span id="year">2026</span> Дмитрий Сорокин // Senior Backend Engineer</div>
+      <div class="footer__sys">NIGHT-CITY NETWIRE :: UPLINK STABLE :: SIG 100%</div>
+    </footer>
+  </div>
 
-          // tracing
-          vec3 p;
-          heightMapTracing(ori,dir,p);
-          vec3 dist = p - ori;
-          vec3 n = getNormal(p, dot(dist,dist) * EPSILON_NRM);
-          vec3 light = normalize(vec3(0.0,1.0,0.8)); 
-
-          // color
-          vec3 color = mix(
-              getSkyColor(dir),
-              getSeaColor(p,n,light,dir,dist),
-            pow(smoothstep(0.0,-0.05,dir.y),0.3));
-
-          // post
-        gl_FragColor = vec4(pow(color,vec3(0.75)), 1.0);
-      }
-    </script>
-    <script src="main.js"></script>
-	<script>
-		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-		})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-		ga('create', 'UA-45096329-3', 'auto');
-		ga('send', 'pageview');
-
-	</script>
-	</body>
+  <script src="script.js"></script>
+</body>
 </html>
