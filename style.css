@@ -1,13 +1,17 @@
 /* ============================================================
-   CYBERPUNK RESUME — style.css
-   Тема: Cyberpunk 2077 green UI + CRT-оверлей
+   RESUME SITE — style.css
+   Две темы (переключаются через html[data-theme]):
+     - gta6: закат Vice City, палитра из wallpapers
+     - cyberpunk: зелёный неон Cyberpunk 2077
    ============================================================ */
 
-:root {
-  /* палитра (по референсу cyberpunk green theme) */
+/* ---------- CYBERPUNK (зелёный неон) ---------- */
+
+[data-theme="cyberpunk"] {
   --bg-300: #181e19;
   --bg-500: #10140f;
   --bg-700: #0b0f0b;
+  --bg-700-rgb: 11, 15, 11;
   --green-200: #a0f48b;
   --green-300: #8eea69;
   --green-500: #7ee85a;
@@ -16,18 +20,130 @@
   --green-800: #1a4517;
   --green-900: #183c25;
   --cyan-500: #2be4ea;
-  --cyan-900: #295459;
   --yellow-500: #fed33f;
   --active: #2bfea0;
   --danger: #ff2e63;
-
   --text: #c9e8bd;
   --text-dim: #6f8f6a;
   --border: var(--green-700);
 
+  --accent-rgb: 126, 232, 90;    /* основное свечение */
+  --accent2-rgb: 43, 254, 160;   /* вторичное свечение */
+  --beam-rgb: 160, 244, 139;     /* луч / мерцание CRT */
+  --amber-rgb: 254, 211, 63;     /* тёплое свечение */
+  --sky-rgb: 52, 156, 48;        /* верхнее свечение фона */
+  --chrom-a-rgb: 255, 46, 99;    /* хроматическая аберрация */
+  --chrom-b-rgb: 43, 228, 234;
+
+  --sun-1: #fcbc5c;
+  --sun-2: #ec9b9f;
+  --sun-3: #ca6492;
+  --font-display: "Rajdhani", sans-serif;
+  --display-weight: 700;
+}
+
+/* ---------- GTA 6 (закат Vice City, палитра из файла) ---------- */
+
+[data-theme="gta6"] {
+  --bg-300: #3c2b55;
+  --bg-500: #33254a;
+  --bg-700: #2f213f;
+  --bg-700-rgb: 47, 33, 63;
+  --green-200: #fbe4ec;
+  --green-300: #f2bcc9;
+  --green-500: #ec9b9f;
+  --green-600: #ca6492;
+  --green-700: #8a5f96;
+  --green-800: #55406f;
+  --green-900: #3c2b55;
+  --cyan-500: #bca4d4;
+  --yellow-500: #fcbc5c;
+  --active: #fcbc5c;
+  --danger: #ff6b8d;
+  --text: #efe2f4;
+  --text-dim: #a68fc0;
+  --border: var(--green-700);
+
+  --accent-rgb: 236, 155, 159;   /* #ec9b9f пион */
+  --accent2-rgb: 252, 188, 92;   /* #fcbc5c закат */
+  --beam-rgb: 252, 188, 92;
+  --amber-rgb: 252, 188, 92;
+  --sky-rgb: 202, 100, 146;      /* #ca6492 маджента */
+  --chrom-a-rgb: 252, 188, 92;
+  --chrom-b-rgb: 202, 100, 146;
+
+  --silhouette: #241430;         /* силуэты пальм */
+
+  --sun-1: #fcbc5c;
+  --sun-2: #ec9b9f;
+  --sun-3: #ca6492;
+  --font-display: "Rajdhani", sans-serif;
+  --display-weight: 700;
+}
+
+/* ---------- GTA VICE CITY (неон 80-х: розовый/циан на тёмном индиго) ---------- */
+
+[data-theme="vicecity"] {
+  --bg-300: #1c1c38;
+  --bg-500: #141430;
+  --bg-700: #0e0e22;
+  --bg-700-rgb: 14, 14, 34;
+  --green-200: #ffd9f2;
+  --green-300: #ffb3e6;
+  --green-500: #ff71ce;
+  --green-600: #e045a8;
+  --green-700: #7a4fb0;
+  --green-800: #4a3678;
+  --green-900: #2a2050;
+  --cyan-500: #01cdfe;
+  --yellow-500: #fffb96;
+  --active: #05ffa1;
+  --danger: #ff4fa0;
+  --text: #e8e6ff;
+  --text-dim: #8f86b8;
+  --border: var(--green-700);
+
+  --accent-rgb: 255, 113, 206;
+  --accent2-rgb: 1, 205, 254;
+  --beam-rgb: 182, 140, 255;
+  --amber-rgb: 255, 251, 150;
+  --sky-rgb: 185, 103, 255;
+  --chrom-a-rgb: 255, 113, 206;
+  --chrom-b-rgb: 1, 205, 254;
+
+  --silhouette: #150f2e;
+
+  --sun-1: #fffb96;
+  --sun-2: #ff71ce;
+  --sun-3: #b967ff;
+  --font-display: "Permanent Marker", "Pangolin", cursive;
+  --display-weight: 400;
+  --font-main: "Montserrat", "Segoe UI", sans-serif;
+}
+
+/* оформление элементов в стиле пена Vice City: Montserrat uppercase italic */
+[data-theme="vicecity"] body {
+  font-style: italic;
+}
+
+[data-theme="vicecity"] .topbar__nav a,
+[data-theme="vicecity"] .section__title,
+[data-theme="vicecity"] .hero__stats li,
+[data-theme="vicecity"] .job__period,
+[data-theme="vicecity"] .job__role,
+[data-theme="vicecity"] .job__company,
+[data-theme="vicecity"] .job__tags span,
+[data-theme="vicecity"] .chip,
+[data-theme="vicecity"] .card__title,
+[data-theme="vicecity"] .linkcard__name,
+[data-theme="vicecity"] .about__subtitle,
+[data-theme="vicecity"] .linkcard__url {
+  text-transform: uppercase;
+}
+
+:root {
   --font-main: "Rajdhani", "Segoe UI", sans-serif;
   --font-mono: "Share Tech Mono", "Courier New", monospace;
-
   --cut: 14px; /* размер срезанного угла панелей */
 }
 
@@ -43,7 +159,8 @@ html {
 
 body {
   background:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(52, 156, 48, 0.14), transparent 60%),
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(var(--sky-rgb), 0.16), transparent 60%),
+    radial-gradient(ellipse 60% 35% at 85% 108%, rgba(var(--accent2-rgb), 0.10), transparent 65%),
     linear-gradient(180deg, var(--bg-300) 0%, var(--bg-500) 40%, var(--bg-700) 100%);
   background-color: var(--bg-700);
   color: var(--text);
@@ -62,8 +179,8 @@ body::before {
   z-index: 0;
   pointer-events: none;
   background:
-    repeating-linear-gradient(0deg, rgba(126, 232, 90, 0.035) 0 1px, transparent 1px 56px),
-    repeating-linear-gradient(90deg, rgba(126, 232, 90, 0.035) 0 1px, transparent 1px 56px);
+    repeating-linear-gradient(0deg, rgba(var(--accent-rgb), 0.04) 0 1px, transparent 1px 56px),
+    repeating-linear-gradient(90deg, rgba(var(--accent-rgb), 0.04) 0 1px, transparent 1px 56px);
   mask-image: radial-gradient(ellipse at 50% 30%, #000 30%, transparent 75%);
   -webkit-mask-image: radial-gradient(ellipse at 50% 30%, #000 30%, transparent 75%);
 }
@@ -71,6 +188,101 @@ body::before {
 ::selection {
   background: var(--green-500);
   color: var(--bg-700);
+}
+
+/* ================= ДЕКОР GTA6: СОЛНЦЕ И ПАЛЬМЫ ================= */
+
+.sun {
+  display: none;
+  position: fixed;
+  top: 64px;
+  right: 5vw;
+  width: min(320px, 34vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, var(--sun-1) 0%, var(--sun-1) 34%, var(--sun-2) 62%, var(--sun-3) 100%);
+  box-shadow: 0 0 90px 20px rgba(252, 188, 92, 0.28);
+  overflow: hidden;
+  opacity: 0.95;
+}
+
+/* ретро-полосы на нижней половине солнца */
+.sun::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 42%;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    180deg,
+    var(--bg-300) 0 6px,
+    transparent 6px 17px
+  );
+  opacity: 0.9;
+}
+
+.palm {
+  display: none;
+  position: fixed;
+  bottom: -6px;
+  z-index: 0;
+  pointer-events: none;
+  line-height: 0;
+  height: min(62vh, 620px);
+  width: min(30vw, 299px);
+  opacity: 0.92;
+}
+
+.palm svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.palm--left {
+  left: -10px;
+}
+
+.palm--right {
+  right: -10px;
+  transform: scaleX(-1);
+}
+
+[data-theme="gta6"] .sun,
+[data-theme="vicecity"] .sun,
+[data-theme="gta6"] .palm,
+[data-theme="vicecity"] .palm {
+  display: block;
+}
+
+@media (max-width: 1100px) {
+  .palm {
+    height: 42vh;
+    width: 20vh;
+    opacity: 0.55;
+  }
+
+  .sun {
+    width: 200px;
+    top: 90px;
+    opacity: 0.75;
+  }
+}
+
+@media (max-width: 760px) {
+  .palm {
+    display: none !important;
+  }
+
+  .sun {
+    width: 140px;
+    right: 12px;
+    top: 110px;
+    opacity: 0.6;
+  }
 }
 
 /* ================= CRT-ОВЕРЛЕЙ ================= */
@@ -117,9 +329,9 @@ body::before {
   background: linear-gradient(
     180deg,
     transparent,
-    rgba(160, 244, 139, 0.045) 40%,
-    rgba(160, 244, 139, 0.08) 50%,
-    rgba(160, 244, 139, 0.045) 60%,
+    rgba(var(--beam-rgb), 0.05) 40%,
+    rgba(var(--beam-rgb), 0.09) 50%,
+    rgba(var(--beam-rgb), 0.05) 60%,
     transparent
   );
   animation: beam 9s linear infinite;
@@ -143,7 +355,7 @@ body::before {
 .crt__flicker {
   position: absolute;
   inset: 0;
-  background: rgba(160, 244, 139, 0.02);
+  background: rgba(var(--beam-rgb), 0.02);
   animation: flicker 0.12s steps(2) infinite;
 }
 
@@ -159,7 +371,7 @@ body::before {
   position: fixed;
   inset: 0;
   z-index: 9500;
-  background: #050805;
+  background: var(--bg-700);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -178,7 +390,7 @@ body::before {
   font-family: var(--font-mono);
   font-size: clamp(13px, 2.2vw, 18px);
   color: var(--green-500);
-  text-shadow: 0 0 8px rgba(126, 232, 90, 0.7);
+  text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.7);
   min-height: 9em;
   width: min(560px, 88vw);
   white-space: pre-wrap;
@@ -218,7 +430,7 @@ body::before {
   gap: 20px;
   padding: 14px 4px;
   margin-bottom: 28px;
-  background: linear-gradient(180deg, rgba(11, 15, 11, 0.96), rgba(11, 15, 11, 0.75));
+  background: linear-gradient(180deg, rgba(var(--bg-700-rgb), 0.96), rgba(var(--bg-700-rgb), 0.75));
   backdrop-filter: blur(4px);
   border-bottom: 1px solid var(--border);
 }
@@ -229,7 +441,7 @@ body::before {
   font-size: 20px;
   letter-spacing: 0.08em;
   color: var(--green-500);
-  text-shadow: 0 0 10px rgba(126, 232, 90, 0.6);
+  text-shadow: 0 0 10px rgba(var(--accent-rgb), 0.6);
   white-space: nowrap;
 }
 
@@ -257,7 +469,7 @@ body::before {
 
 .topbar__nav a:hover {
   color: var(--active);
-  text-shadow: 0 0 8px rgba(43, 254, 160, 0.8);
+  text-shadow: 0 0 8px rgba(var(--accent2-rgb), 0.8);
 }
 
 .topbar__status {
@@ -283,11 +495,11 @@ body::before {
 
 .panel {
   position: relative;
-  background: linear-gradient(160deg, rgba(24, 60, 37, 0.28), rgba(11, 15, 11, 0.72));
+  background: linear-gradient(160deg, rgba(var(--accent-rgb), 0.1), rgba(var(--bg-700-rgb), 0.72));
   border: 1px solid var(--border);
   box-shadow:
-    inset 0 0 0 1px rgba(11, 15, 11, 0.6),
-    0 0 18px rgba(126, 232, 90, 0.07);
+    inset 0 0 0 1px rgba(var(--bg-700-rgb), 0.6),
+    0 0 18px rgba(var(--accent-rgb), 0.08);
   clip-path: polygon(
     var(--cut) 0,
     100% 0,
@@ -315,8 +527,9 @@ body::before {
 }
 
 .hero__name {
+  font-family: var(--font-display);
   font-size: clamp(38px, 8vw, 84px);
-  font-weight: 700;
+  font-weight: var(--display-weight);
   line-height: 1;
   letter-spacing: 0.02em;
   color: var(--green-200);
@@ -327,7 +540,7 @@ body::before {
   font-family: var(--font-mono);
   font-size: clamp(16px, 3vw, 24px);
   color: var(--yellow-500);
-  text-shadow: 0 0 12px rgba(254, 211, 63, 0.35);
+  text-shadow: 0 0 12px rgba(var(--amber-rgb), 0.4);
   min-height: 1.5em;
   margin-bottom: 26px;
 }
@@ -336,7 +549,7 @@ body::before {
   display: inline-block;
   width: 0.6em;
   background: var(--green-500);
-  box-shadow: 0 0 8px var(--green-500);
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.9);
   animation: blink 0.9s steps(1) infinite;
 }
 
@@ -352,7 +565,7 @@ body::before {
   font-size: 14px;
   color: var(--text);
   border: 1px solid var(--green-800);
-  background: rgba(24, 60, 37, 0.35);
+  background: rgba(var(--accent-rgb), 0.08);
   padding: 6px 14px;
   clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
 }
@@ -369,15 +582,16 @@ body::before {
 }
 
 .section__title {
+  font-family: var(--font-display);
   font-size: clamp(26px, 4.5vw, 40px);
-  font-weight: 700;
+  font-weight: var(--display-weight);
   letter-spacing: 0.06em;
   color: var(--green-500);
   margin-bottom: 18px;
   text-shadow:
-    0 0 14px rgba(126, 232, 90, 0.45),
-    1px 0 rgba(255, 46, 99, 0.55),
-    -1px 0 rgba(43, 228, 234, 0.55);
+    0 0 14px rgba(var(--accent-rgb), 0.45),
+    1px 0 rgba(var(--chrom-a-rgb), 0.55),
+    -1px 0 rgba(var(--chrom-b-rgb), 0.55);
 }
 
 .section__title::before {
@@ -458,7 +672,7 @@ body::before {
   bottom: 6px;
   width: 2px;
   background: linear-gradient(180deg, var(--green-500), var(--green-800) 60%, transparent);
-  box-shadow: 0 0 8px rgba(126, 232, 90, 0.4);
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.4);
 }
 
 .job {
@@ -477,7 +691,7 @@ body::before {
   background: var(--bg-700);
   border: 2px solid var(--green-500);
   transform: rotate(45deg);
-  box-shadow: 0 0 10px rgba(126, 232, 90, 0.7);
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.7);
 }
 
 .job__period {
@@ -546,7 +760,7 @@ body::before {
   font-size: 12.5px;
   color: var(--green-200);
   border: 1px solid var(--green-800);
-  background: rgba(26, 69, 23, 0.4);
+  background: rgba(var(--accent-rgb), 0.1);
   padding: 3px 10px;
   clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
 }
@@ -581,7 +795,7 @@ body::before {
   font-size: 15px;
   color: var(--text);
   border: 1px solid var(--green-700);
-  background: rgba(24, 60, 37, 0.3);
+  background: rgba(var(--accent-rgb), 0.08);
   padding: 6px 16px;
   cursor: default;
   clip-path: polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px);
@@ -591,14 +805,14 @@ body::before {
 .chip:hover {
   color: var(--bg-700);
   background: var(--green-500);
-  box-shadow: 0 0 16px rgba(126, 232, 90, 0.55);
+  box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.55);
   transform: translateY(-2px);
 }
 
 .chip--core {
   color: var(--green-300);
   border-color: var(--green-600);
-  background: rgba(26, 69, 23, 0.55);
+  background: rgba(var(--accent-rgb), 0.16);
 }
 
 .chip--core:hover {
@@ -646,8 +860,8 @@ body::before {
 
 .linkcard:hover {
   transform: translateY(-4px);
-  background: linear-gradient(160deg, rgba(33, 94, 53, 0.5), rgba(11, 15, 11, 0.8));
-  box-shadow: 0 0 26px rgba(126, 232, 90, 0.25);
+  background: linear-gradient(160deg, rgba(var(--accent-rgb), 0.22), rgba(var(--bg-700-rgb), 0.8));
+  box-shadow: 0 0 26px rgba(var(--accent-rgb), 0.25);
 }
 
 .linkcard__id {
@@ -753,6 +967,61 @@ body::before {
   transform: none;
 }
 
+/* ================= ПЕРЕКЛЮЧАТЕЛИ (язык / тема) ================= */
+
+.lang-toggle,
+.theme-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  background: rgba(var(--accent-rgb), 0.08);
+  clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px);
+}
+
+.lang-toggle__opt,
+.theme-toggle__opt {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  background: transparent;
+  border: none;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, box-shadow 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle__opt {
+  padding: 5px 10px;
+}
+
+.theme-toggle__opt svg {
+  width: 21px;
+  height: 21px;
+  display: block;
+}
+
+.lang-toggle__opt:hover,
+.theme-toggle__opt:hover {
+  color: var(--green-300);
+}
+
+.lang-toggle__opt.is-active {
+  color: var(--bg-700);
+  background: var(--green-500);
+  box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.5);
+  text-shadow: none;
+}
+
+/* активная тема — иконка цвета неона с glow */
+.theme-toggle__opt.is-active {
+  color: var(--green-500);
+  background: rgba(var(--accent-rgb), 0.14);
+  filter: drop-shadow(0 0 6px rgba(var(--accent-rgb), 0.9));
+}
+
 /* ================= АДАПТИВ ================= */
 
 @media (max-width: 760px) {
@@ -766,9 +1035,13 @@ body::before {
   }
 
   .topbar__nav {
-    order: 3;
+    order: 5;
     width: 100%;
     justify-content: flex-start;
+  }
+
+  .lang-toggle {
+    margin-left: auto;
   }
 
   .hero {
@@ -814,43 +1087,5 @@ body::before {
     opacity: 1;
     transform: none;
     transition: none;
-  }
-}
-
-/* ================= ПЕРЕКЛЮЧАТЕЛЬ ЯЗЫКА ================= */
-
-.lang-toggle {
-  display: flex;
-  border: 1px solid var(--border);
-  background: rgba(24, 60, 37, 0.3);
-  clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px);
-}
-
-.lang-toggle__opt {
-  font-family: var(--font-mono);
-  font-size: 13px;
-  letter-spacing: 0.08em;
-  color: var(--text-dim);
-  background: transparent;
-  border: none;
-  padding: 5px 12px;
-  cursor: pointer;
-  transition: color 0.15s, background 0.15s, box-shadow 0.15s;
-}
-
-.lang-toggle__opt:hover {
-  color: var(--green-300);
-}
-
-.lang-toggle__opt.is-active {
-  color: var(--bg-700);
-  background: var(--green-500);
-  box-shadow: 0 0 12px rgba(126, 232, 90, 0.5);
-  text-shadow: none;
-}
-
-@media (max-width: 760px) {
-  .lang-toggle {
-    margin-left: auto;
   }
 }

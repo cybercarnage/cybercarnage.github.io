@@ -16,6 +16,31 @@
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  /* ==================== ТЕМЫ (gta6 / cyberpunk) ==================== */
+
+  const THEME_KEY = "nc-resume-theme";
+  let theme =
+    localStorage.getItem(THEME_KEY) ||
+    document.documentElement.getAttribute("data-theme") ||
+    "gta6";
+
+  function applyTheme(name) {
+    theme = name;
+    localStorage.setItem(THEME_KEY, name);
+    document.documentElement.setAttribute("data-theme", name);
+    document.querySelectorAll(".theme-toggle__opt").forEach((btn) => {
+      btn.classList.toggle("is-active", btn.dataset.setTheme === name);
+    });
+  }
+
+  function initThemeToggle() {
+    document.querySelectorAll(".theme-toggle__opt").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (btn.dataset.setTheme !== theme) applyTheme(btn.dataset.setTheme);
+      });
+    });
+  }
+
   /* ==================== СЛОВАРЬ ПЕРЕВОДОВ ==================== */
 
   const I18N = {
@@ -517,6 +542,8 @@
   /* ==================== СТАРТ ==================== */
 
   document.addEventListener("DOMContentLoaded", () => {
+    applyTheme(theme);
+    initThemeToggle();
     applyLang(lang, { initial: true });
     initLangToggle();
     initFooterYear();
